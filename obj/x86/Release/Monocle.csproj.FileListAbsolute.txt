@@ -1,0 +1,10 @@
+C:\Users\Thales\source\repos\Monocle\bin\x86\Release\Monocle.exe.config
+C:\Users\Thales\source\repos\Monocle\bin\x86\Release\Monocle.exe
+C:\Users\Thales\source\repos\Monocle\bin\x86\Release\Monocle.pdb
+C:\Users\Thales\source\repos\Monocle\obj\x86\Release\Monocle.csproj.AssemblyReference.cache
+C:\Users\Thales\source\repos\Monocle\obj\x86\Release\Image_View.form.resources
+C:\Users\Thales\source\repos\Monocle\obj\x86\Release\Monocle.Properties.Resources.resources
+C:\Users\Thales\source\repos\Monocle\obj\x86\Release\Monocle.csproj.GenerateResource.cache
+C:\Users\Thales\source\repos\Monocle\obj\x86\Release\Monocle.csproj.CoreCompileInputs.cache
+C:\Users\Thales\source\repos\Monocle\obj\x86\Release\Monocle.exe
+C:\Users\Thales\source\repos\Monocle\obj\x86\Release\Monocle.pdb
