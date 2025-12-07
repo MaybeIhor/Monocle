@@ -10,7 +10,6 @@ namespace Image_View
 {
     public partial class form : Form
     {
-        private Image originalImage;
         private string currentFileName;
         private bool dark;
 
@@ -22,6 +21,7 @@ namespace Image_View
             InitializeComponent();
             ApplySystemTheme();
             toolStrip.Renderer = new FixedRenderer();
+            editBox.Renderer = new FixedRenderer();
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
 
             if (!string.IsNullOrEmpty(filePath))
@@ -43,7 +43,10 @@ namespace Image_View
         private void SetDarkTheme()
         {
             BackColor = Color.FromArgb(255, 25, 25, 25);
+            editBox.BackColor = Color.FromArgb(255, 25, 25, 25);
             toolStrip.ForeColor = SystemColors.Window;
+            editBox.ForeColor = SystemColors.Window;
+            pictureBox.InvalidateCache();
             themeButton.Text = "⛯";
             dark = true;
         }
@@ -51,65 +54,50 @@ namespace Image_View
         private void SetLightTheme()
         {
             BackColor = SystemColors.Window;
+            editBox.BackColor = SystemColors.Window;
             toolStrip.ForeColor = SystemColors.ControlText;
+            editBox.ForeColor = SystemColors.ControlText;
+            pictureBox.InvalidateCache();
             themeButton.Text = "⛭";
             dark = false;
         }
 
         private void LoadImage(string path)
         {
-            DisposeImages();
-
             try
             {
+                pictureBox.Image?.Dispose();
+                pictureBox.Image = null;
                 using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 8192))
                 using (Image tempImage = Image.FromStream(fs, false, false))
                 {
                     PixelFormat format = HasTransparency(tempImage) ? PixelFormat.Format32bppArgb : PixelFormat.Format24bppRgb;
 
-                    originalImage = new Bitmap(tempImage.Width, tempImage.Height, format);
-                    using (Graphics g = Graphics.FromImage(originalImage))
+                    Image temp = new Bitmap(tempImage.Width, tempImage.Height, format);
+                    using (Graphics g = Graphics.FromImage(temp))
                     {
                         g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
                         g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighSpeed;
                         g.DrawImage(tempImage, 0, 0, tempImage.Width, tempImage.Height);
                     }
+                    pictureBox.Image = temp;
+                    pictureBox.ResetCrop();
+                    currentFileName = path;
+                    UpdateTitle();
                 }
-
-                pictureBox.Image = (Image)originalImage.Clone();
-                currentFileName = Path.GetFileName(path);
-                UpdateTitle();
-                saveButton.Enabled = true;
-                printButton.Enabled = true;
             }
-            catch {}
+            catch { }
         }
+        private bool HasTransparency(Image img) => img.PixelFormat == PixelFormat.Format32bppArgb || img.PixelFormat == PixelFormat.Format32bppPArgb || img.RawFormat.Equals(ImageFormat.Png);
 
-        private bool HasTransparency(Image image)
-        {
-            if (image.PixelFormat == PixelFormat.Format32bppArgb || image.PixelFormat == PixelFormat.Format32bppPArgb)
-            {
-                return true;
-            }
-
-            if (image.RawFormat.Equals(ImageFormat.Png))
-            {
-                return true;
-            }
-
-            return false;
-        }
         private void UpdateTitle()
         {
-            Text = originalImage != null? $"{originalImage.Width} x {originalImage.Height}   {currentFileName ?? "Untitled.png"}": "Monocle";
-        }
+            Rectangle? crop = pictureBox.GetCrop();
 
-        private void DisposeImages()
-        {
-            pictureBox.Image?.Dispose();
-            originalImage?.Dispose();
-            pictureBox.Image = null;
-            originalImage = null;
+            int width = crop.HasValue ? crop.Value.Width : pictureBox.Image.Width;
+            int height = crop.HasValue ? crop.Value.Height : pictureBox.Image.Height;
+
+            Text = pictureBox.Image != null ? $"{width} x {height}   {Path.GetFileName(currentFileName) ?? "Untitled.png"}" : "Monocle";
         }
 
         private void Form_DragEnter(object sender, DragEventArgs e)
@@ -122,12 +110,6 @@ namespace Image_View
         {
             if (e.Data.GetData(DataFormats.FileDrop) is string[] files && files.Length > 0)
                 LoadImage(files[0]);
-        }
-
-        private void Form_Shown(object sender, EventArgs e)
-        {
-            if (dark)
-                SetDarkTheme();
         }
 
         private void OpenButton_Click(object sender, EventArgs e)
@@ -145,28 +127,6 @@ namespace Image_View
             }
         }
 
-        private void MirrorButton_Click(object sender, EventArgs e)
-        {
-            if (pictureBox.Image != null)
-            {
-                originalImage.RotateFlip(RotateFlipType.RotateNoneFlipX);
-                pictureBox.Image.RotateFlip(RotateFlipType.RotateNoneFlipX);
-                pictureBox.Invalidate();
-                pictureBox.InvalidateCache();
-            }
-        }
-
-        private void RotateButton_Click(object sender, EventArgs e)
-        {
-            if (pictureBox.Image != null)
-            {
-                originalImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
-                pictureBox.Image.RotateFlip(RotateFlipType.Rotate90FlipNone);
-                pictureBox.Invalidate();
-                pictureBox.InvalidateCache();
-            }
-        }
-
         private void PictureBox_MouseEnter(object sender, EventArgs e)
         {
             pictureBox.Focus();
@@ -174,29 +134,38 @@ namespace Image_View
 
         private void ThemeButton_Click(object sender, EventArgs e)
         {
-            if (!dark)
-                SetDarkTheme();
-            else
-                SetLightTheme();
-            pictureBox.InvalidateCache();
+            if (dark) SetLightTheme();
+            else SetDarkTheme();
         }
 
         private void RestoreButton_Click(object sender, EventArgs e)
         {
-            if (originalImage != null)
-            {
-                pictureBox.Image?.Dispose();
-                pictureBox.Image = (Image)originalImage.Clone();
-            }
+            if (pictureBox.Image == null) return;
+
+            pictureBox.ResetCrop();
+            UpdateTitle();
         }
 
         private void PictureBox_MouseDown(object sender, MouseEventArgs e)
         {
+            editBox.Visible = false;
+
             if (pictureBox.Image != null && e.Button == MouseButtons.Right)
             {
                 toolStrip.Visible = !toolStrip.Visible;
                 pictureBox.Invalidate();
             }
+        }
+
+        private ImageCodecInfo GetEncoder(ImageFormat format)
+        {
+            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageDecoders();
+            foreach (ImageCodecInfo codec in codecs)
+            {
+                if (codec.FormatID == format.Guid)
+                    return codec;
+            }
+            return null;
         }
 
         private void SaveButton_Click(object sender, EventArgs e)
@@ -216,87 +185,95 @@ namespace Image_View
                 {
                     try
                     {
-                        string ext = Path.GetExtension(dialog.FileName).ToLower();
-
-                        if (ext == ".jpg" || ext == ".jpeg")
+                        using (Image imageToSave = pictureBox.GetVisible())
                         {
-                            using (var encoderParams = new EncoderParameters(1))
+                            string ext = Path.GetExtension(dialog.FileName).ToLower();
+
+                            if (ext == ".jpg" || ext == ".jpeg")
                             {
-                                encoderParams.Param[0] = new EncoderParameter(Encoder.Quality, 95L);
-                                pictureBox.Image.Save(dialog.FileName, GetEncoder(ImageFormat.Jpeg), encoderParams);
+                                using (var encoderParams = new EncoderParameters(1))
+                                {
+                                    encoderParams.Param[0] = new EncoderParameter(Encoder.Quality, 95L);
+                                    imageToSave.Save(dialog.FileName, GetEncoder(ImageFormat.Jpeg), encoderParams);
+                                }
+                            }
+                            else if (ext == ".bmp")
+                            {
+                                imageToSave.Save(dialog.FileName, ImageFormat.Bmp);
+                            }
+                            else
+                            {
+                                imageToSave.Save(dialog.FileName);
                             }
                         }
-                        else if (ext == ".bmp")
-                        {
-                            pictureBox.Image.Save(dialog.FileName, ImageFormat.Bmp);
-                        }
-                        else
-                        {
-                            pictureBox.Image.Save(dialog.FileName);
-                        }
                     }
-                    catch {}
+                    catch { }
                 }
             }
-        }
-     
-        private ImageCodecInfo GetEncoder(ImageFormat format)
-        {
-            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageDecoders();
-            foreach (ImageCodecInfo codec in codecs)
-            {
-                if (codec.FormatID == format.Guid)
-                    return codec;
-            }
-            return null;
         }
 
         private void Form_KeyUp(object sender, KeyEventArgs e)
         {
             if (e.Control && e.KeyCode == Keys.Z)
-            {
                 RestoreButton_Click(sender, e);
-            }
             else if (e.Control && e.KeyCode == Keys.V)
-            {
                 PasteFromClipboard();
-            }
+            else if (e.Control && e.KeyCode == Keys.G)
+                GridButton_Click(sender, e);
         }
 
         private void PasteFromClipboard()
         {
             if (!Clipboard.ContainsImage()) return;
 
-            DisposeImages();
-
             using (Image clipboardImage = Clipboard.GetImage())
             {
                 PixelFormat format = HasTransparency(clipboardImage) ? PixelFormat.Format32bppArgb : PixelFormat.Format24bppRgb;
 
-                originalImage = new Bitmap(clipboardImage.Width, clipboardImage.Height, format);
-                using (Graphics g = Graphics.FromImage(originalImage))
+                Image temp = new Bitmap(clipboardImage.Width, clipboardImage.Height, format);
+                using (Graphics g = Graphics.FromImage(temp))
                 {
                     g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
                     g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighSpeed;
                     g.DrawImage(clipboardImage, 0, 0, clipboardImage.Width, clipboardImage.Height);
                 }
+                pictureBox.Image = temp;
+                currentFileName = null;
+                UpdateTitle();
             }
-
-            pictureBox.Image = (Image)originalImage.Clone();
-            currentFileName = null;
-            UpdateTitle();
-            saveButton.Enabled = true;
-            printButton.Enabled = true;
         }
-        
+
         private void PrintButton_Click(object sender, EventArgs e)
         {
             if (pictureBox.Image == null) return;
 
             try
             {
+                Image imageToPrint = pictureBox.GetVisible();
+
                 PrintDocument pd = new PrintDocument();
-                pd.PrintPage += (o, args) => args.Graphics.DrawImage(pictureBox.Image, new Point(0, 0));
+
+                pd.PrintPage += (o, args) =>
+                {
+                    Rectangle printArea = args.MarginBounds;
+
+                    float scaleX = (float)printArea.Width / imageToPrint.Width;
+                    float scaleY = (float)printArea.Height / imageToPrint.Height;
+                    float scale = Math.Min(scaleX, scaleY);
+
+                    int scaledWidth = (int)(imageToPrint.Width * scale);
+                    int scaledHeight = (int)(imageToPrint.Height * scale);
+
+                    int x = printArea.Left + (printArea.Width - scaledWidth) / 2;
+                    int y = printArea.Top;
+
+                    args.Graphics.DrawImage(imageToPrint, x, y, scaledWidth, scaledHeight);
+                };
+
+                pd.EndPrint += (o, args) =>
+                {
+                    imageToPrint?.Dispose();
+                };
 
                 using (PrintDialog printDialog = new PrintDialog())
                 {
@@ -305,9 +282,67 @@ namespace Image_View
                     {
                         pd.Print();
                     }
+                    else
+                    {
+                        imageToPrint?.Dispose();
+                    }
                 }
             }
-            catch {}
+            catch { }
+        }
+
+        private void EditButton_Click(object sender, EventArgs e)
+        {
+            editBox.Visible = !editBox.Visible;
+        }
+
+        private void Rotate90Button_Click(object sender, EventArgs e)
+        {
+            if (pictureBox.Image == null) return;
+
+            pictureBox.Image.RotateFlip(RotateFlipType.Rotate90FlipNone);
+            pictureBox.InvalidateBoth();
+            pictureBox.Crop90();
+            UpdateTitle();
+        }
+
+        private void Rotate270Button_Click(object sender, EventArgs e)
+        {
+            if (pictureBox.Image == null) return;
+
+            pictureBox.Image.RotateFlip(RotateFlipType.Rotate270FlipNone);
+            pictureBox.InvalidateBoth();
+            pictureBox.Crop270();
+            UpdateTitle();
+        }
+
+        private void MirrorButton_Click(object sender, EventArgs e)
+        {
+            if (pictureBox.Image == null) return;
+
+            pictureBox.Image.RotateFlip(RotateFlipType.RotateNoneFlipX);
+            pictureBox.InvalidateBoth();
+            pictureBox.CropMirror();
+            UpdateTitle();
+        }
+
+        private void PictureBox_MouseUp(object sender, MouseEventArgs e)
+        {
+            UpdateTitle();
+        }
+
+        private void GrayButton_Click(object sender, EventArgs e)
+        {
+            if (pictureBox.Image == null) return;
+            pictureBox.ApplyGrayscale();
+            pictureBox.InvalidateBoth();
+        }
+
+        private void GridButton_Click(object sender, EventArgs e)
+        {
+            if (pictureBox.Image == null) return;
+            pictureBox.isGridding = !pictureBox.isGridding;
+            pictureBox.Invalidate();
         }
     }
 }
