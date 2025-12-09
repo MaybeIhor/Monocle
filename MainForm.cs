@@ -10,7 +10,7 @@ namespace Image_View
 {
     public partial class form : Form
     {
-        private string currentFileName;
+        private string currentFileName = "Untitled.png";
         private bool dark;
 
         [System.Runtime.InteropServices.DllImport("dwmapi.dll", PreserveSig = true)]
@@ -248,7 +248,6 @@ namespace Image_View
                 }
                 pictureBox.Image = temp;
                 pictureBox.ResetCrop();
-                currentFileName = "Untitled.png";
                 UpdateTitle();
             }
         }
@@ -355,6 +354,16 @@ namespace Image_View
             if (pictureBox.Image == null) return;
             pictureBox.isGridding = !pictureBox.isGridding;
             pictureBox.Invalidate();
+        }
+
+        private void Form_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Control && e.KeyCode == Keys.Z)
+                RestoreButton_Click(sender, e);
+            else if (e.Control && e.KeyCode == Keys.V)
+                PasteFromClipboard();
+            else if (e.Control && e.KeyCode == Keys.G)
+                GridButton_Click(sender, e);
         }
     }
 }
