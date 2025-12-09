@@ -97,7 +97,7 @@ namespace Image_View
             int width = crop.HasValue ? crop.Value.Width : pictureBox.Image.Width;
             int height = crop.HasValue ? crop.Value.Height : pictureBox.Image.Height;
 
-            Text = pictureBox.Image != null ? $"{width} x {height}   {Path.GetFileName(currentFileName) ?? "Untitled.png"}" : "Monocle";
+            Text = pictureBox.Image != null ? $"{width} x {height}   {Path.GetFileName(currentFileName)}" : "Monocle";
         }
 
         private void Form_DragEnter(object sender, DragEventArgs e)
@@ -168,6 +168,15 @@ namespace Image_View
             return null;
         }
 
+        private int PickExtension(string ext) 
+        {
+            if (ext == ".jpg" || ext == ".jpeg")
+                return 2;
+            if (ext == ".bmp")
+                return 3;
+            return 1;
+        }
+
         private void SaveButton_Click(object sender, EventArgs e)
         {
             if (pictureBox.Image == null) return;
@@ -176,9 +185,9 @@ namespace Image_View
             {
                 InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures),
                 Filter = "PNG (*.png)|*.png|JPEG (*.jpg;*.jpeg)|*.jpg;*.jpeg|BMP (*.bmp)|*.bmp",
-                FilterIndex = 1,
-                FileName = "Untitled.png",
-                RestoreDirectory = true
+                FilterIndex = PickExtension(Path.GetExtension(currentFileName).ToLower()),
+                FileName = Path.GetFileName(currentFileName),
+                RestoreDirectory = false
             })
             {
                 if (dialog.ShowDialog() == DialogResult.OK)
@@ -239,7 +248,7 @@ namespace Image_View
                 }
                 pictureBox.Image = temp;
                 pictureBox.ResetCrop();
-                currentFileName = null;
+                currentFileName = "Untitled.png";
                 UpdateTitle();
             }
         }
