@@ -28,7 +28,7 @@
             this.rotate90Button = new System.Windows.Forms.ToolStripButton();
             this.rotate270Button = new System.Windows.Forms.ToolStripButton();
             this.mirrorButton = new System.Windows.Forms.ToolStripButton();
-            this.grayButton = new System.Windows.Forms.ToolStripButton();
+            this.redirectButton = new System.Windows.Forms.ToolStripButton();
             this.gridButton = new System.Windows.Forms.ToolStripButton();
             this.pictureBox = new Image_View.DontBlurBox();
             this.toolStrip.SuspendLayout();
@@ -108,7 +108,7 @@
             this.restoreButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.restoreButton.Margin = new System.Windows.Forms.Padding(0, 1, 0, 1);
             this.restoreButton.Name = "restoreButton";
-            this.restoreButton.Size = new System.Drawing.Size(92, 27);
+            this.restoreButton.Size = new System.Drawing.Size(91, 27);
             this.restoreButton.Text = "Return";
             this.restoreButton.Click += new System.EventHandler(this.RestoreButton_Click);
             // 
@@ -136,7 +136,7 @@
             this.toolStrip.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
             this.toolStrip.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.toolStrip.ShowItemToolTips = false;
-            this.toolStrip.Size = new System.Drawing.Size(467, 29);
+            this.toolStrip.Size = new System.Drawing.Size(466, 29);
             this.toolStrip.TabIndex = 2;
             // 
             // editButton
@@ -168,16 +168,16 @@
             this.rotate90Button,
             this.rotate270Button,
             this.mirrorButton,
-            this.grayButton,
-            this.gridButton});
+            this.gridButton,
+            this.redirectButton});
             this.editBox.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
-            this.editBox.Location = new System.Drawing.Point(108, 50);
+            this.editBox.Location = new System.Drawing.Point(107, 50);
             this.editBox.Name = "editBox";
             this.editBox.Padding = new System.Windows.Forms.Padding(0);
             this.editBox.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
             this.editBox.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.editBox.ShowItemToolTips = false;
-            this.editBox.Size = new System.Drawing.Size(251, 29);
+            this.editBox.Size = new System.Drawing.Size(252, 29);
             this.editBox.TabIndex = 3;
             this.editBox.Visible = false;
             // 
@@ -228,20 +228,20 @@
             this.mirrorButton.Text = "◭";
             this.mirrorButton.Click += new System.EventHandler(this.MirrorButton_Click);
             // 
-            // grayButton
+            // redirectButton
             // 
-            this.grayButton.AutoSize = false;
-            this.grayButton.AutoToolTip = false;
-            this.grayButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.grayButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.grayButton.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.grayButton.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.grayButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.grayButton.Margin = new System.Windows.Forms.Padding(0, 1, 0, 1);
-            this.grayButton.Name = "grayButton";
-            this.grayButton.Size = new System.Drawing.Size(50, 27);
-            this.grayButton.Text = "◪";
-            this.grayButton.Click += new System.EventHandler(this.GrayButton_Click);
+            this.redirectButton.AutoSize = false;
+            this.redirectButton.AutoToolTip = false;
+            this.redirectButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.redirectButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.redirectButton.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.redirectButton.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.redirectButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.redirectButton.Margin = new System.Windows.Forms.Padding(0, 1, 0, 1);
+            this.redirectButton.Name = "redirectButton";
+            this.redirectButton.Size = new System.Drawing.Size(50, 27);
+            this.redirectButton.Text = "▷";
+            this.redirectButton.Click += new System.EventHandler(this.RedirectButton_Click);
             // 
             // gridButton
             // 
@@ -260,11 +260,14 @@
             // 
             // pictureBox
             // 
+            this.pictureBox.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.pictureBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pictureBox.ErrorImage = null;
             this.pictureBox.Image = null;
+            this.pictureBox.InitialImage = null;
             this.pictureBox.Location = new System.Drawing.Point(0, 29);
             this.pictureBox.Name = "pictureBox";
-            this.pictureBox.Size = new System.Drawing.Size(467, 369);
+            this.pictureBox.Size = new System.Drawing.Size(466, 369);
             this.pictureBox.TabIndex = 4;
             this.pictureBox.TabStop = false;
             this.pictureBox.Text = "pictureBox";
@@ -282,7 +285,7 @@
             this.BackColor = System.Drawing.SystemColors.Window;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.CausesValidation = false;
-            this.ClientSize = new System.Drawing.Size(467, 398);
+            this.ClientSize = new System.Drawing.Size(466, 398);
             this.Controls.Add(this.editBox);
             this.Controls.Add(this.pictureBox);
             this.Controls.Add(this.toolStrip);
@@ -318,7 +321,7 @@
         private System.Windows.Forms.ToolStrip editBox;
         private System.Windows.Forms.ToolStripButton rotate270Button;
         private System.Windows.Forms.ToolStripButton mirrorButton;
-        private System.Windows.Forms.ToolStripButton grayButton;
+        private System.Windows.Forms.ToolStripButton redirectButton;
         private System.Windows.Forms.ToolStripButton rotate90Button;
         private DontBlurBox pictureBox;
         private System.Windows.Forms.ToolStripButton gridButton;

@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Monocle")]
 [assembly: AssemblyDescription("Image view program")]
 [assembly: AssemblyProduct("Monocle")]
+[assembly: AssemblyCompany("Postihor")]
 [assembly: AssemblyCopyright("Copyright © 2024")]
 [assembly: ComVisible(false)]
 

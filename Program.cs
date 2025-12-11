@@ -23,6 +23,7 @@ namespace Image_View
             }
         }
     }
+
     public class FixedRenderer : ToolStripSystemRenderer
     {
         [DllImport("dwmapi.dll", EntryPoint = "#127")]

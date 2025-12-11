@@ -106,6 +106,8 @@ namespace Image_View
             return croppedImage;
         }
 
+      
+
         private void CalculateImageBounds()
         {
             if (Image == null) return;
@@ -230,9 +232,23 @@ namespace Image_View
                 return;
             }
 
-            p1 = ClampToImage(e.Location);
+            p1 = SnapToPixel(ClampToImage(e.Location));
             p2 = Point.Empty;
             isDown = true;
+        }
+
+        private Point SnapToPixel(Point screenPoint)
+        {
+            double pixelX = (screenPoint.X - imageRect.X) / scale + 1;
+            double pixelY = (screenPoint.Y - imageRect.Y) / scale + 1;
+
+            int snappedPixelX = (int)Math.Floor(pixelX);
+            int snappedPixelY = (int)Math.Floor(pixelY);
+
+            int screenX = imageRect.X + (int)Math.Round(snappedPixelX * scale);
+            int screenY = imageRect.Y + (int)Math.Round(snappedPixelY * scale);
+
+            return new Point(screenX, screenY);
         }
 
         private void OnMouseMove(object sender, MouseEventArgs e)
@@ -261,12 +277,10 @@ namespace Image_View
 
         private void ApplyCrop()
         {
-            double invScale = 1.0 / scale;
-
-            double x1 = (p1.X - imageRect.X) * invScale;
-            double y1 = (p1.Y - imageRect.Y) * invScale;
-            double x2 = (p2.X - imageRect.X) * invScale;
-            double y2 = (p2.Y - imageRect.Y) * invScale;
+            int x1 = (int)Math.Floor((p1.X - imageRect.X) / scale);
+            int y1 = (int)Math.Floor((p1.Y - imageRect.Y) / scale);
+            int x2 = (int)Math.Floor((p2.X - imageRect.X) / scale);
+            int y2 = (int)Math.Floor((p2.Y - imageRect.Y) / scale);
 
             if (crop.HasValue)
             {
@@ -276,56 +290,19 @@ namespace Image_View
                 y2 += crop.Value.Y;
             }
 
-            int minX = Math.Max(0, Math.Min(Image.Width - 1, (int)Math.Min(x1, x2)));
-            int minY = Math.Max(0, Math.Min(Image.Height - 1, (int)Math.Min(y1, y2)));
-            int maxX = (int)Math.Max(x1, x2);
-            int maxY = (int)Math.Max(y1, y2);
+            int minX = Math.Max(0, Math.Min(x1, x2));
+            int minY = Math.Max(0, Math.Min(y1, y2));
+            int maxX = Math.Min(Image.Width, Math.Max(x1, x2));
+            int maxY = Math.Min(Image.Height, Math.Max(y1, y2));
 
-            int w = Math.Min(Image.Width - minX, maxX - minX);
-            int h = Math.Min(Image.Height - minY, maxY - minY);
+            int w = maxX - minX;
+            int h = maxY - minY;
 
             if (w >= 6 && h >= 6)
             {
                 crop = new Rectangle(minX, minY, w, h);
                 InvalidateBoth();
             }
-        }
-
-        public void ApplyGrayscale()
-        {
-            if (base.Image == null) return;
-
-            if (!(base.Image is Bitmap bmp)) return;
-
-            BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, bmp.PixelFormat);
-
-            int bytesPerPixel = Image.GetPixelFormatSize(bmp.PixelFormat) / 8;
-            int stride = data.Stride;
-            int heightInPixels = data.Height;
-
-            unsafe
-            {
-                byte* ptr = (byte*)data.Scan0;
-
-                for (int y = 0; y < heightInPixels; y++)
-                {
-                    for (int x = 0; x < data.Width; x++)
-                    {
-                        int offset = y * stride + x * bytesPerPixel;
-                        byte b = ptr[offset];
-                        byte g = ptr[offset + 1];
-                        byte r = ptr[offset + 2];
-
-                        byte gray = (byte)(0.299 * r + 0.587 * g + 0.114 * b);
-
-                        ptr[offset] = gray;
-                        ptr[offset + 1] = gray;
-                        ptr[offset + 2] = gray;
-                    }
-                }
-            }
-            bmp.UnlockBits(data);
-            InvalidateBoth();
         }
 
         protected override void Dispose(bool disposing)

@@ -6,11 +6,12 @@ using System.Drawing.Printing;
 using System.IO;
 using System.Windows.Forms;
 
+
 namespace Image_View
 {
     public partial class form : Form
     {
-        private string currentFileName = "Untitled.png";
+        private string currentFileName;
         private bool dark;
 
         [System.Runtime.InteropServices.DllImport("dwmapi.dll", PreserveSig = true)]
@@ -247,6 +248,7 @@ namespace Image_View
                     g.DrawImage(clipboardImage, 0, 0, clipboardImage.Width, clipboardImage.Height);
                 }
                 pictureBox.Image = temp;
+                currentFileName = "Untitled.png";
                 pictureBox.ResetCrop();
                 UpdateTitle();
             }
@@ -342,13 +344,6 @@ namespace Image_View
             UpdateTitle();
         }
 
-        private void GrayButton_Click(object sender, EventArgs e)
-        {
-            if (pictureBox.Image == null) return;
-            pictureBox.ApplyGrayscale();
-            pictureBox.InvalidateBoth();
-        }
-
         private void GridButton_Click(object sender, EventArgs e)
         {
             if (pictureBox.Image == null) return;
@@ -364,6 +359,30 @@ namespace Image_View
                 PasteFromClipboard();
             else if (e.Control && e.KeyCode == Keys.G)
                 GridButton_Click(sender, e);
+        }
+
+        private void RedirectButton_Click(object sender, EventArgs e)
+        {
+            if (pictureBox.Image == null) return;
+
+            try
+            {
+                string tempPath = Path.Combine(Path.GetTempPath(), $"monocle_{Path.GetFileName(currentFileName)}");
+
+                using (Image imageToEdit = pictureBox.GetVisible())
+                {
+                    imageToEdit.Save(tempPath, ImageFormat.Png);
+                }
+
+                var startInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "rundll32.exe",
+                    Arguments = $"shell32.dll,OpenAs_RunDLL {tempPath}",
+                    UseShellExecute = false
+                };
+                System.Diagnostics.Process.Start(startInfo);
+            }
+            catch { }
         }
     }
 }
