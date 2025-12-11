@@ -106,8 +106,6 @@ namespace Image_View
             return croppedImage;
         }
 
-      
-
         private void CalculateImageBounds()
         {
             if (Image == null) return;

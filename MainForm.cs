@@ -367,7 +367,7 @@ namespace Image_View
 
             try
             {
-                string tempPath = Path.Combine(Path.GetTempPath(), $"monocle_{Path.GetFileName(currentFileName)}");
+                string tempPath = Path.Combine(Path.GetTempPath(), Path.GetFileName(currentFileName));
 
                 using (Image imageToEdit = pictureBox.GetVisible())
                 {
