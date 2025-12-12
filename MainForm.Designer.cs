@@ -173,13 +173,13 @@
             this.resizeButton,
             this.redirectButton});
             this.editBox.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
-            this.editBox.Location = new System.Drawing.Point(83, 50);
+            this.editBox.Location = new System.Drawing.Point(82, 50);
             this.editBox.Name = "editBox";
             this.editBox.Padding = new System.Windows.Forms.Padding(0);
             this.editBox.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
             this.editBox.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.editBox.ShowItemToolTips = false;
-            this.editBox.Size = new System.Drawing.Size(301, 31);
+            this.editBox.Size = new System.Drawing.Size(302, 31);
             this.editBox.TabIndex = 3;
             this.editBox.Visible = false;
             // 
@@ -311,7 +311,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.KeyPreview = true;
             this.Margin = new System.Windows.Forms.Padding(4);
-            this.MinimumSize = new System.Drawing.Size(317, 275);
+            this.MinimumSize = new System.Drawing.Size(318, 275);
             this.Name = "form";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Text = "Monocle";
